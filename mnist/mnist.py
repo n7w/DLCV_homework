@@ -7,11 +7,7 @@ import torchvision.transforms as transforms
 import torch.nn.functional as F
 import torch.optim as optim
 ## load mnist dataset
-use_cuda = torch.cuda.is_available()
-
 root = './data'
-if not os.path.exists(root):
-    os.mkdir(root)
     
 trans = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (1.0,))])
 # if not exist, download mnist dataset
@@ -28,23 +24,6 @@ test_loader = torch.utils.data.DataLoader(
                 dataset=test_set,
                 batch_size=batch_size,
                 shuffle=False)
-
-## network
-# class MLPNet(nn.Module):
-#     def __init__(self):
-#         super(MLPNet, self).__init__()
-#         self.fc1 = nn.Linear(28*28, 500)
-#         self.fc2 = nn.Linear(500, 256)
-#         self.fc3 = nn.Linear(256, 10)
-#     def forward(self, x):
-#         x = x.view(-1, 28*28)
-#         x = F.relu(self.fc1(x))
-#         x = F.relu(self.fc2(x))
-#         x = self.fc3(x)
-#         return x
-    
-#     def name(self):
-#         return "MLP"
 
 class LeNet(nn.Module):
     def __init__(self):
@@ -70,9 +49,6 @@ class LeNet(nn.Module):
 ## training
 model = LeNet()
 
-if use_cuda:
-    model = model.cuda()
-
 optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
 
 criterion = nn.CrossEntropyLoss()
@@ -82,8 +58,7 @@ for epoch in range(10):
     ave_loss = 0
     for batch_idx, (x, target) in enumerate(train_loader):
         optimizer.zero_grad()
-        if use_cuda:
-            x, target = x.cuda(), target.cuda()
+        x, target = x.cuda(), target.cuda()
         x, target = Variable(x), Variable(target)
         out = model(x)
         loss = criterion(out, target)
@@ -97,8 +72,7 @@ for epoch in range(10):
     correct_cnt, ave_loss = 0, 0
     total_cnt = 0
     for batch_idx, (x, target) in enumerate(test_loader):
-        if use_cuda:
-            x, target = x.cuda(), target.cuda()
+        x, target = x.cuda(), target.cuda()
         x, target = Variable(x, volatile=True), Variable(target, volatile=True)
         out = model(x)
         loss = criterion(out, target)
